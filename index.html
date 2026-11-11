@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Web de estudio para opositores a Auxiliar Administrativo del Estado: temario, test con penalización, calculadora de nota y temporizador.">
-<meta name="theme-color" content="#0F2A5C">
+<meta name="theme-color" content="#4A2C1E">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Plaza C2</title>
@@ -13,24 +13,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap">
 <style>
-/* Layout: corporativo. Cabecera y bloque principal en azul marino de marca, contenido en gris claro con tarjetas blancas; el verde azulado es el color firma (logo, progreso, estado). */
+/* Layout: corporativo. Cabecera y bloque principal en marrón chocolate, fondo crema claro con tarjetas blancas; melocotón como color firma (logo, progreso, pestaña activa) y toques de azul en etiquetas, números y selección. */
 :root{
-  --bg:#F3F5F9; --card:#FFFFFF; --ink:#0E1B33; --muted:#5B6A82; --line:#DDE3EC;
-  --brand:#0F2A5C; --brand-ink:#FFFFFF; --brand-muted:#AFC0DD; --brand-line:rgba(255,255,255,.14);
-  --teal:#0E9C93; --teal-soft:#E2F4F2; --btn:#0F2A5C; --btn-ink:#FFFFFF;
-  --ok:#1E8E4E; --ok-soft:#E6F4EC; --bad:#C93A3A; --bad-soft:#FCEDED;
+  --bg:#FBF6F2; --card:#FFFFFF; --ink:#2B1D16; --muted:#7A665A; --line:#EBDFD6;
+  --brand:#4A2C1E; --brand-ink:#FFFFFF; --brand-muted:#E0CBBD; --brand-line:rgba(255,255,255,.14);
+  --teal:#2E5E8E; --teal-soft:#FCE7DA; --btn:#4A2C1E; --btn-ink:#FFFFFF;
+  --peach:#F4A582; --peach-ink:#4A2C1E;
+  --ok:#2E8550; --ok-soft:#E7F4EB; --bad:#C23B3B; --bad-soft:#FCEDED;
   --f-display:"Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   --f-body:"Inter", "Segoe UI", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0A111F; --card:#111B2E; --ink:#E8EDF6; --muted:#97A5BD; --line:#22304A;
-  --brand:#0C1D40; --brand-ink:#FFFFFF; --brand-muted:#A5B6D4; --brand-line:rgba(255,255,255,.12);
-  --teal:#2CC4B9; --teal-soft:#0F2E30; --btn:#2CC4B9; --btn-ink:#06221F;
+  --bg:#17110D; --card:#211813; --ink:#F3E9E2; --muted:#B39F92; --line:#3A2C23;
+  --brand:#2C1B12; --brand-ink:#FFFFFF; --brand-muted:#D2BAAA; --brand-line:rgba(255,255,255,.1);
+  --teal:#8DB4E2; --teal-soft:#3A2519; --btn:#F4A582; --btn-ink:#2B1D16;
+  --peach:#F4A582; --peach-ink:#2B1D16;
   --ok:#5CC98A; --ok-soft:#14291D; --bad:#F08080; --bad-soft:#2E1919; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0A111F; --card:#111B2E; --ink:#E8EDF6; --muted:#97A5BD; --line:#22304A;
-  --brand:#0C1D40; --brand-ink:#FFFFFF; --brand-muted:#A5B6D4; --brand-line:rgba(255,255,255,.12);
-  --teal:#2CC4B9; --teal-soft:#0F2E30; --btn:#2CC4B9; --btn-ink:#06221F;
+  --bg:#17110D; --card:#211813; --ink:#F3E9E2; --muted:#B39F92; --line:#3A2C23;
+  --brand:#2C1B12; --brand-ink:#FFFFFF; --brand-muted:#D2BAAA; --brand-line:rgba(255,255,255,.1);
+  --teal:#8DB4E2; --teal-soft:#3A2519; --btn:#F4A582; --btn-ink:#2B1D16;
+  --peach:#F4A582; --peach-ink:#2B1D16;
   --ok:#5CC98A; --ok-soft:#14291D; --bad:#F08080; --bad-soft:#2E1919; color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -50,13 +53,13 @@ header.top{background:var(--brand);color:var(--brand-ink);position:sticky;top:en
 .top .wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap;min-height:64px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.15rem;letter-spacing:-.01em;color:var(--brand-ink);text-decoration:none}
 .brand svg{width:34px;height:34px;flex:none}
-.brand .tag{color:var(--teal)}
+.brand .tag{color:var(--peach)}
 .brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:.68rem;letter-spacing:.04em;color:var(--brand-muted);margin-top:-2px}
 nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-left:auto;scrollbar-width:none;align-self:stretch}
 nav.tabs::-webkit-scrollbar{display:none}
 nav.tabs a{display:flex;align-items:center;color:var(--brand-muted);text-decoration:none;padding:0 14px;font-weight:500;font-size:.92rem;white-space:nowrap;border-bottom:3px solid transparent;border-top:3px solid transparent}
 nav.tabs a:hover{color:var(--brand-ink)}
-nav.tabs a[aria-current="page"]{color:var(--brand-ink);border-bottom-color:var(--teal)}
+nav.tabs a[aria-current="page"]{color:var(--brand-ink);border-bottom-color:var(--peach)}
 @media (max-width:700px){.top .wrap{gap:0;padding-top:10px}nav.tabs{margin-left:-14px;width:calc(100% + 14px);min-height:46px}}
 
 main{padding-block:32px 80px}
@@ -69,14 +72,14 @@ section.view{display:grid;gap:24px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
 .btn{border:1px solid var(--line);background:var(--card);padding:9px 18px;border-radius:8px;font-weight:600;font-size:.92rem}
-.btn:hover{border-color:var(--teal)}
+.btn:hover{border-color:var(--peach)}
 .btn.primary{background:var(--btn);border-color:var(--btn);color:var(--btn-ink)}
 .btn.primary:hover{opacity:.9}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
-.bar>span{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .4s}
+.bar>span{display:block;height:100%;background:var(--peach);border-radius:99px;transition:width .4s}
 .bar.ok>span{background:var(--ok)}
 .note{font-size:.86rem;color:var(--muted)}
 
@@ -94,6 +97,7 @@ input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:v
 .hero-main .row label{font-size:.88rem;color:var(--brand-muted)}
 .hero-main input[type=date]{background:rgba(255,255,255,.08);color:var(--brand-ink);border-color:var(--brand-line);color-scheme:dark}
 .hero-main .note{color:var(--brand-muted)}
+.count b{color:var(--peach)}
 .exam{display:grid;gap:14px;align-content:start;position:relative;z-index:1;color:var(--ink)}
 .exam dl{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;margin:0}
 .exam dt{font-family:var(--f-display);font-weight:800;color:var(--teal);min-width:3.2em;font-variant-numeric:tabular-nums}
@@ -140,7 +144,7 @@ input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:v
 .opt:hover:not(:disabled){background:var(--bg)}
 .opt:disabled{cursor:default}
 .bub{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:.76rem;font-weight:700;color:var(--muted)}
-.opt.sel .bub{background:var(--brand);border-color:var(--brand);color:#FFFFFF}
+.opt.sel .bub{background:var(--teal);border-color:var(--teal);color:var(--card)}
 .opt.is-right{background:var(--ok-soft)}
 .opt.is-right .bub{border-color:var(--ok);color:var(--ok)}
 .opt.sel.is-right .bub{background:var(--ok);border-color:var(--ok);color:#FFFFFF}
@@ -165,12 +169,12 @@ input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:v
 .calc h3{font-size:1.15rem}
 .calc .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
 .calc label{display:grid;gap:6px;font-weight:600;font-size:.86rem;color:var(--muted)}
-.formula{background:var(--bg);border-left:3px solid var(--teal);border-radius:4px;padding:12px 14px;font-size:.92rem;overflow-x:auto}
+.formula{background:var(--bg);border-left:3px solid var(--peach);border-radius:4px;padding:12px 14px;font-size:.92rem;overflow-x:auto}
 
 /* Temporizador */
 .pomo{display:grid;gap:18px;justify-items:center;text-align:center;padding-block:36px}
 .pomo .clock{font-family:var(--f-display);font-size:clamp(3.6rem,12vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.pomo .phase{font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--teal-soft);color:var(--teal);text-transform:uppercase;letter-spacing:.08em}
+.pomo .phase{font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--teal-soft);color:var(--brand);text-transform:uppercase;letter-spacing:.08em}
 .pomo .phase.rest{background:var(--ok-soft);color:var(--ok)}
 .tips{display:grid;gap:10px;margin:0;padding-left:1.3em}
 .tips li::marker{color:var(--teal);font-weight:800}
@@ -184,7 +188,7 @@ footer svg{width:28px;height:28px;flex:none}
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#panel" aria-label="Plaza C2, inicio"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#14B3A8"/><path d="M20 7 33.5 14.5H6.5Z" fill="#FFFFFF"/><rect x="9.5" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="17.75" y="17" width="4.5" height="11" rx="1" fill="#0F2A5C"/><rect x="26" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="6.5" y="29.5" width="27" height="3.5" rx="1" fill="#FFFFFF"/></svg><span>Plaza <span class="tag">C2</span><small>Auxiliar Administrativo del Estado</small></span></a>
+    <a class="brand" href="#panel" aria-label="Plaza C2, inicio"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#F4A582"/><path d="M20 7 33.5 14.5H6.5Z" fill="#4A2C1E"/><rect x="9.5" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="17.75" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="26" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="6.5" y="29.5" width="27" height="3.5" rx="1" fill="#4A2C1E"/></svg><span>Plaza <span class="tag">C2</span><small>Auxiliar Administrativo del Estado</small></span></a>
     <nav class="tabs" aria-label="Secciones">
       <a href="#panel" data-v="panel">Inicio</a>
       <a href="#temario" data-v="temario">Temario</a>
@@ -372,7 +376,7 @@ footer svg{width:28px;height:28px;flex:none}
 </section>
 
 </main>
-<footer><div class="wrap"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#14B3A8"/><path d="M20 7 33.5 14.5H6.5Z" fill="#FFFFFF"/><rect x="9.5" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="17.75" y="17" width="4.5" height="11" rx="1" fill="#0F2A5C"/><rect x="26" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="6.5" y="29.5" width="27" height="3.5" rx="1" fill="#FFFFFF"/></svg><span>Plaza C2 · herramienta de estudio para opositores. No es una web oficial: consulta las convocatorias en el BOE y en la web del INAP.</span></div></footer>
+<footer><div class="wrap"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#F4A582"/><path d="M20 7 33.5 14.5H6.5Z" fill="#4A2C1E"/><rect x="9.5" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="17.75" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="26" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="6.5" y="29.5" width="27" height="3.5" rx="1" fill="#4A2C1E"/></svg><span>Plaza C2 · herramienta de estudio para opositores. No es una web oficial: consulta las convocatorias en el BOE y en la web del INAP.</span></div></footer>
 
 <script>
 (function(){
