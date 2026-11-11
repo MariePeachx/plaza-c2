@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Web de estudio para opositores a Auxiliar Administrativo del Estado: temario, test con penalización, calculadora de nota y pomodoro.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Plaza C2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: app de estudio con pestañas. Cabecera institucional azul, papel azulado, el rotulador fosforito marca lo importante; el test imita la hoja de respuestas del examen. */
+:root{
+  --paper:#F4F6FA; --card:#FFFFFF; --ink:#14213D; --muted:#5A6478; --line:#D8DEEA;
+  --accent:#2445C2; --accent-soft:#E6EBFB; --marker:#FFE45C; --on-marker:#14213D;
+  --ok:#1C7F47; --ok-soft:#E2F3E9; --bad:#B8322A; --bad-soft:#FBE7E5; --warn:#9A6A00;
+  --head:#14213D; --on-head:#F4F6FA;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1422; --card:#151D30; --ink:#E7ECF6; --muted:#9AA5BC; --line:#27324C;
+  --accent:#8EA5FF; --accent-soft:#1D2848; --marker:#E9CB3D; --on-marker:#14213D;
+  --ok:#5BCB8A; --ok-soft:#12301F; --bad:#F2857B; --bad-soft:#3A1916; --warn:#E3B44B;
+  --head:#0A0F1B; --on-head:#E7ECF6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1422; --card:#151D30; --ink:#E7ECF6; --muted:#9AA5BC; --line:#27324C;
+  --accent:#8EA5FF; --accent-soft:#1D2848; --marker:#E9CB3D; --on-marker:#14213D;
+  --ok:#5BCB8A; --ok-soft:#12301F; --bad:#F2857B; --bad-soft:#3A1916; --warn:#E3B44B;
+  --head:#0A0F1B; --on-head:#E7ECF6; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--head)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hl{background:linear-gradient(transparent 58%,var(--marker) 58%,var(--marker) 92%,transparent 92%);color:inherit;padding:0 .1em}
+:root[data-theme="dark"] .hl{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--marker) 45%,transparent) 62%,color-mix(in srgb,var(--marker) 45%,transparent) 92%,transparent 92%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hl{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--marker) 45%,transparent) 62%,color-mix(in srgb,var(--marker) 45%,transparent) 92%,transparent 92%)}}
+
+/* Cabecera */
+header.top{background:var(--head);color:var(--on-head);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.top .wrap{display:flex;align-items:center;gap:20px;padding-block:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;letter-spacing:-.01em}
+.brand .tag{font-family:var(--f-mono);font-size:.72rem;font-weight:700;background:var(--marker);color:var(--on-marker);padding:2px 7px;border-radius:3px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;margin-left:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{color:var(--on-head);text-decoration:none;padding:7px 12px;border-radius:6px;font-weight:600;font-size:.95rem;white-space:nowrap;opacity:.72}
+nav.tabs a:hover{opacity:1}
+nav.tabs a[aria-current="page"]{opacity:1;background:color-mix(in srgb,var(--on-head) 14%,transparent)}
+@media (max-width:640px){.top .wrap{gap:8px}nav.tabs{margin-left:0;width:100%}}
+
+main{padding-block:28px 64px}
+section.view{display:grid;gap:24px}
+.view-head{display:grid;gap:8px;max-width:68ch}
+.view-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem);font-weight:800;letter-spacing:-.02em}
+.view-head p{color:var(--muted)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.btn{border:1px solid var(--line);background:var(--card);padding:9px 16px;border-radius:7px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--card)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=date],input[type=number],select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.bar.ok>span{background:var(--ok)}
+.note{font-size:.88rem;color:var(--muted)}
+
+/* Panel */
+.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.hero-main{background:var(--head);color:var(--on-head);border-radius:12px;padding:28px;display:grid;gap:18px;align-content:start}
+.hero-main h1{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:800;letter-spacing:-.025em}
+.hero-main h1 em{font-style:normal;background:var(--marker);color:var(--on-marker);padding:0 .15em;border-radius:3px}
+.hero-main p{opacity:.82;max-width:52ch}
+.count{display:flex;gap:10px;flex-wrap:wrap}
+.count div{background:color-mix(in srgb,var(--on-head) 9%,transparent);border-radius:8px;padding:10px 14px;min-width:78px}
+.count b{display:block;font-family:var(--f-mono);font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.count span{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.hero-main .row label{font-size:.9rem;opacity:.85}
+.hero-main input[type=date]{background:color-mix(in srgb,var(--on-head) 10%,transparent);color:var(--on-head);border-color:color-mix(in srgb,var(--on-head) 25%,transparent);color-scheme:dark}
+.exam{display:grid;gap:14px;align-content:start}
+.exam dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0}
+.exam dt{font-family:var(--f-mono);font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.exam dd{margin:0}
+.stat{display:grid;gap:8px}
+.stat .big{font-family:var(--f-display);font-weight:800;font-size:2.2rem;line-height:1}
+.hist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.hist li{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;border-top:1px solid var(--line);padding-top:6px}
+.next-tema{display:grid;gap:6px}
+.next-tema strong{font-family:var(--f-display);font-size:1.15rem;line-height:1.25}
+
+/* Temario */
+.bloque{display:grid;gap:12px}
+.bloque-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.bloque-head h3{font-size:1.35rem}
+.temas{list-style:none;margin:0;padding:0;display:grid;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.temas li{display:grid;grid-template-columns:3.2em minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-top:1px solid var(--line)}
+.temas li:first-child{border-top:0}
+.temas .n{font-family:var(--f-mono);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.temas .t{min-width:0}
+.state{border:1px solid var(--line);background:transparent;border-radius:99px;padding:4px 12px;font-size:.82rem;font-weight:700;white-space:nowrap;min-width:108px}
+.state[data-s="1"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.state[data-s="2"]{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+@media (max-width:520px){.temas li{grid-template-columns:2.4em minmax(0,1fr)}.temas .state{grid-column:2;justify-self:start}}
+
+/* Test */
+.test-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.timer{font-family:var(--f-mono);font-weight:700;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
+@media (max-width:860px){.sheet{grid-template-columns:1fr}.answer-sheet{position:static!important}}
+.qs{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.q{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px}
+.q.right{border-color:var(--ok)}
+.q.wrong{border-color:var(--bad)}
+.q-top{display:flex;gap:10px;align-items:baseline}
+.q-top .num{color:var(--muted);font-weight:700}
+.q-top .chip{margin-left:auto}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:6px 8px}
+.opt:hover:not(:disabled){background:var(--accent-soft)}
+.opt:disabled{cursor:default}
+.bub{width:28px;height:28px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-family:var(--f-mono);font-weight:700;font-size:.8rem;color:var(--muted)}
+.opt.sel .bub{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.opt.is-right{background:var(--ok-soft)}
+.opt.is-right .bub{border-color:var(--ok);color:var(--ok)}
+.opt.sel.is-right .bub{background:var(--ok);border-color:var(--ok);color:var(--card)}
+.opt.sel.is-wrong{background:var(--bad-soft)}
+.opt.sel.is-wrong .bub{background:var(--bad);border-color:var(--bad);color:var(--card)}
+.expl{font-size:.92rem;color:var(--muted);border-left:3px solid var(--marker);padding-left:10px}
+.answer-sheet{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:grid;gap:12px}
+.as-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.as-grid button{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:4px 0;font-family:var(--f-mono);font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums}
+.as-grid button.done{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.as-grid button.r{background:var(--ok);border-color:var(--ok);color:var(--card)}
+.as-grid button.w{background:var(--bad);border-color:var(--bad);color:var(--card)}
+.result{display:grid;gap:14px}
+.result .scores{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.result .scores b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.result .scores span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.result .grade{font-family:var(--f-display);font-weight:800;font-size:3rem;line-height:1}
+.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+
+/* Nota */
+.calc{display:grid;gap:14px}
+.calc .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.calc label{display:grid;gap:4px;font-weight:600;font-size:.92rem}
+.formula{font-family:var(--f-mono);background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:.9rem;overflow-x:auto}
+
+/* Pomodoro */
+.pomo{display:grid;gap:16px;justify-items:center;text-align:center;padding-block:28px}
+.pomo .clock{font-family:var(--f-mono);font-weight:700;font-size:clamp(3.4rem,12vw,6rem);line-height:1;font-variant-numeric:tabular-nums}
+.pomo .phase{font-weight:700;padding:4px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.pomo .phase.rest{background:var(--ok-soft);color:var(--ok)}
+.tips{display:grid;gap:10px;margin:0;padding-left:1.2em}
+.tips li::marker{color:var(--accent);font-weight:700}
+
+footer{border-top:1px solid var(--line);padding-block:20px;color:var(--muted);font-size:.88rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Plaza <span class="tag">C2</span></div>
+    <nav class="tabs" aria-label="Secciones">
+      <a href="#panel" data-v="panel">Panel</a>
+      <a href="#temario" data-v="temario">Temario</a>
+      <a href="#test" data-v="test">Test</a>
+      <a href="#nota" data-v="nota">Calculadora</a>
+      <a href="#estudio" data-v="estudio">Pomodoro</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- PANEL -->
+<section class="view" id="v-panel">
+  <div class="hero">
+    <div class="hero-main">
+      <span class="label" style="color:inherit;opacity:.7">Cuerpo General Auxiliar de la Administración del Estado</span>
+      <h1>Cada tema tachado te acerca a <em>tu plaza</em>.</h1>
+      <p>Organiza el temario, practica con test tipo examen y calcula tu nota con la penalización real. Todo se guarda en tu navegador.</p>
+      <div class="count" aria-live="polite">
+        <div><b id="cd-d">--</b><span>días</span></div>
+        <div><b id="cd-h">--</b><span>horas</span></div>
+        <div><b id="cd-t">--</b><span>temas/semana</span></div>
+      </div>
+      <div class="row">
+        <label for="exam-date">Fecha de tu examen</label>
+        <input type="date" id="exam-date">
+        <span class="note" id="date-hint" style="color:inherit;opacity:.7"></span>
+      </div>
+    </div>
+    <div class="card exam">
+      <span class="label">Así es el examen</span>
+      <dl>
+        <dt>90′</dt><dd>Ejercicio único, dos partes que se hacen seguidas.</dd>
+        <dt>30+30</dt><dd>Parte 1: 30 preguntas del Bloque I y 30 psicotécnicas.</dd>
+        <dt>50</dt><dd>Parte 2: 50 preguntas del Bloque II (ofimática y actividad administrativa).</dd>
+        <dt>−⅓</dt><dd>Cada fallo resta un tercio de acierto. Las preguntas en blanco no restan.</dd>
+      </dl>
+      <p class="note">Datos orientativos de convocatorias recientes. Comprueba siempre las bases de tu convocatoria en el BOE.</p>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card stat">
+      <span class="label">Temario estudiado</span>
+      <span class="big num" id="st-pct">0%</span>
+      <div class="bar"><span id="st-bar" style="width:0%"></span></div>
+      <span class="note" id="st-detail">0 de 28 temas</span>
+    </div>
+    <div class="card stat">
+      <span class="label">Media en test</span>
+      <span class="big num" id="st-avg">—</span>
+      <span class="note" id="st-avg-detail">Haz tu primer test para ver tu media.</span>
+    </div>
+    <div class="card next-tema">
+      <span class="label">Siguiente tema</span>
+      <strong id="next-tema">—</strong>
+      <span class="note" id="next-bloque"></span>
+      <div class="row" style="margin-top:6px"><a class="btn" href="#temario" style="text-decoration:none">Ir al temario</a></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <span class="label">Últimos test</span>
+      <a class="btn primary" href="#test" style="text-decoration:none">Hacer un test</a>
+    </div>
+    <ul class="hist" id="hist"></ul>
+  </div>
+</section>
+
+<!-- TEMARIO -->
+<section class="view" id="v-temario" hidden>
+  <div class="view-head">
+    <span class="label">28 temas · 2 bloques</span>
+    <h2>El <span class="hl">temario</span>, tema a tema</h2>
+    <p>Pulsa el estado de cada tema para avanzarlo: pendiente, estudiado, repasado. El Panel te propone siempre el primer tema pendiente.</p>
+  </div>
+  <div id="bloques" style="display:grid;gap:28px"></div>
+  <p class="note">Títulos resumidos a partir del programa de convocatorias recientes. El programa oficial puede cambiar de una convocatoria a otra.</p>
+</section>
+
+<!-- TEST -->
+<section class="view" id="v-test" hidden>
+  <div class="view-head">
+    <span class="label">Hoja de respuestas</span>
+    <h2>Test con <span class="hl">penalización real</span></h2>
+    <p>Marca una burbuja por pregunta, o déjala en blanco si dudas. Al corregir, cada fallo resta ⅓. El reloj va al ritmo del examen: unos 49 segundos por pregunta.</p>
+  </div>
+  <div class="card test-bar" id="test-setup">
+    <div class="row">
+      <label for="t-bloque" class="label">Materia</label>
+      <select id="t-bloque">
+        <option value="all">Todo mezclado</option>
+        <option value="I">Bloque I · Organización pública</option>
+        <option value="P">Psicotécnicos</option>
+        <option value="II">Bloque II · Ofimática</option>
+      </select>
+      <label for="t-n" class="label">Preguntas</label>
+      <select id="t-n">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="999">Todas</option>
+      </select>
+    </div>
+    <div class="row">
+      <span class="timer" id="t-timer">00:00</span>
+      <button class="btn" id="t-new">Nuevo test</button>
+      <button class="btn primary" id="t-check">Corregir</button>
+    </div>
+  </div>
+  <div class="sheet">
+    <ol class="qs" id="qs"></ol>
+    <aside class="card answer-sheet">
+      <span class="label">Tu hoja</span>
+      <div class="as-grid" id="as-grid"></div>
+      <span class="note" id="as-count"></span>
+      <div class="result" id="result" hidden></div>
+    </aside>
+  </div>
+</section>
+
+<!-- NOTA -->
+<section class="view" id="v-nota" hidden>
+  <div class="view-head">
+    <span class="label">Aciertos − fallos ÷ 3</span>
+    <h2>Calcula tu <span class="hl">nota</span></h2>
+    <p>Mete lo que sacaste en un simulacro o en el examen oficial (con la plantilla de respuestas provisional) y mira tus netas por parte.</p>
+  </div>
+  <div class="grid2">
+    <div class="card calc">
+      <h3>Primera parte</h3>
+      <div class="fields">
+        <label for="p1-a">Aciertos<input type="number" id="p1-a" min="0" max="60" value="42"></label>
+        <label for="p1-f">Fallos<input type="number" id="p1-f" min="0" max="60" value="9"></label>
+        <label for="p1-n">Nº preguntas<input type="number" id="p1-n" min="1" value="60"></label>
+      </div>
+      <div id="p1-out"></div>
+    </div>
+    <div class="card calc">
+      <h3>Segunda parte</h3>
+      <div class="fields">
+        <label for="p2-a">Aciertos<input type="number" id="p2-a" min="0" max="50" value="33"></label>
+        <label for="p2-f">Fallos<input type="number" id="p2-f" min="0" max="50" value="6"></label>
+        <label for="p2-n">Nº preguntas<input type="number" id="p2-n" min="1" value="50"></label>
+      </div>
+      <div id="p2-out"></div>
+    </div>
+  </div>
+  <div class="card calc">
+    <span class="label">Cómo se calcula</span>
+    <div class="formula">netas = aciertos − fallos ÷ 3<br>nota (sobre 50) = netas ÷ nº preguntas × 50</div>
+    <p class="note">Los valores de ejemplo están puestos para que veas cómo funciona. La nota de corte la fija el tribunal en cada convocatoria, así que úsalo para comparar simulacros, no como predicción.</p>
+  </div>
+</section>
+
+<!-- POMODORO -->
+<section class="view" id="v-estudio" hidden>
+  <div class="view-head">
+    <span class="label">Bloques de 25 minutos</span>
+    <h2>Sesión de <span class="hl">estudio</span></h2>
+    <p>25 minutos de concentración y 5 de descanso. Cada cuatro, un descanso largo de 15.</p>
+  </div>
+  <div class="grid2">
+    <div class="card pomo">
+      <span class="phase" id="pm-phase">Estudio</span>
+      <div class="clock" id="pm-clock">25:00</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn primary" id="pm-go">Empezar</button>
+        <button class="btn" id="pm-reset">Reiniciar</button>
+        <button class="btn" id="pm-skip">Saltar fase</button>
+      </div>
+      <span class="note" id="pm-count">Hoy: 0 pomodoros</span>
+    </div>
+    <div class="card" style="display:grid;gap:12px;align-content:start">
+      <h3>Consejos que funcionan</h3>
+      <ol class="tips">
+        <li>Lee la ley, no solo el resumen. En la Constitución y en las Leyes 39/2015 y 40/2015 caen plazos y números exactos.</li>
+        <li>Haz psicotécnicos cada día, aunque sean diez. Son 30 preguntas y se entrenan.</li>
+        <li>Practica Word, Excel y Access abriendo el programa. La segunda parte pregunta por menús y atajos.</li>
+        <li>Contestar al azar entre cuatro opciones no suma ni resta de media. Si puedes descartar una, contestar ya compensa; si no, déjala en blanco.</li>
+        <li>Haz un simulacro completo de 110 preguntas en 90 minutos cada semana el último mes.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer><div class="wrap">Plaza C2 · herramienta de estudio para opositores. No es una web oficial: consulta las convocatorias en el BOE y en la web del INAP.</div></footer>
+
+<script>
+(function(){
+const store={get(k,d){try{const v=localStorage.getItem('pc2-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pc2-'+k,JSON.stringify(v))}catch(e){}}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(n,d=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ---------- Temario ---------- */
+const TEMARIO={
+ I:{name:'Bloque I · Organización pública',temas:[
+  'La Constitución Española de 1978: estructura, principios generales, derechos y deberes fundamentales',
+  'La Corona. Funciones constitucionales del Rey',
+  'Las Cortes Generales: composición y funciones. El Defensor del Pueblo',
+  'El Poder Judicial. El Consejo General del Poder Judicial. El Tribunal Constitucional',
+  'El Gobierno: composición, nombramiento, cese y funciones',
+  'El Gobierno Abierto. La Agenda 2030 y los Objetivos de Desarrollo Sostenible',
+  'La Ley 19/2013, de transparencia, acceso a la información pública y buen gobierno',
+  'La Administración General del Estado: órganos centrales y periféricos',
+  'La organización territorial del Estado. Las comunidades autónomas',
+  'La Administración local: la provincia y el municipio',
+  'La Unión Europea: instituciones y fuentes del derecho',
+  'Las Leyes 39/2015 y 40/2015: procedimiento administrativo común y régimen jurídico del sector público',
+  'La protección de datos personales: RGPD y Ley Orgánica 3/2018',
+  'Políticas de igualdad y contra la violencia de género. Discapacidad y dependencia',
+  'El personal al servicio de las Administraciones Públicas: el TREBEP',
+  'Derechos, deberes e incompatibilidades. El presupuesto del Estado']},
+ II:{name:'Bloque II · Actividad administrativa y ofimática',temas:[
+  'Atención al público: acogida e información. Los servicios de información administrativa',
+  'Documento, registro y archivo. Funciones del registro y del archivo',
+  'Administración electrónica y servicios al ciudadano',
+  'Informática básica: conceptos de hardware y software',
+  'El sistema operativo Windows: escritorio, configuración y accesorios',
+  'El Explorador de archivos: carpetas, archivos y búsquedas',
+  'Procesador de textos: Word (Microsoft 365)',
+  'Hoja de cálculo: Excel (Microsoft 365)',
+  'Bases de datos: Access (Microsoft 365)',
+  'Correo electrónico: Outlook (Microsoft 365)',
+  'La red Internet: conceptos, navegadores y buscadores',
+  'Seguridad y protección de la información en el puesto de trabajo']}
+};
+const STATES=['Pendiente','Estudiado','Repasado'];
+let estado=store.get('temario',{});
+function key(b,i){return b+'-'+i}
+function renderTemario(){
+  const box=$('#bloques');box.innerHTML='';
+  for(const b of ['I','II']){
+    const t=TEMARIO[b];const done=t.temas.filter((_,i)=>(estado[key(b,i)]||0)>0).length;
+    const div=document.createElement('div');div.className='bloque';
+    div.innerHTML=`<div class="bloque-head"><h3>${t.name}</h3><span class="note num">${done}/${t.temas.length} estudiados</span></div>
+      <div class="bar"><span style="width:${done/t.temas.length*100}%"></span></div>
+      <ol class="temas">${t.temas.map((x,i)=>{const s=estado[key(b,i)]||0;return `<li><span class="n">T${String(i+1).padStart(2,'0')}</span><span class="t">${esc(x)}</span><button class="state" data-k="${key(b,i)}" data-s="${s}" aria-label="Estado del tema ${i+1}: ${STATES[s]}">${STATES[s]}</button></li>`}).join('')}</ol>`;
+    box.appendChild(div);
+  }
+}
+$('#bloques').addEventListener('click',e=>{
+  const btn=e.target.closest('.state');if(!btn)return;
+  const k=btn.dataset.k;estado[k]=((estado[k]||0)+1)%3;store.set('temario',estado);
+  renderTemario();renderPanel();
+  const nb=document.querySelector(`.state[data-k="${k}"]`);if(nb)nb.focus();
+});
+
+/* ---------- Preguntas ---------- */
+const Q=[
+ {b:'I',q:'¿Cuántos artículos tiene la Constitución Española de 1978?',o:['159','169','179','196'],a:1,e:'169 artículos, más disposiciones adicionales, transitorias, derogatoria y final.'},
+ {b:'I',q:'Según el artículo 1.3 de la Constitución, la forma política del Estado español es:',o:['La Monarquía constitucional','El Estado social y democrático de Derecho','La Monarquía parlamentaria','La democracia representativa'],a:2,e:'Art. 1.3 CE: «La forma política del Estado español es la Monarquía parlamentaria».'},
+ {b:'I',q:'¿Qué título de la Constitución regula la Corona?',o:['Título I','Título II','Título III','Título Preliminar'],a:1,e:'El Título II (arts. 56 a 65) regula la Corona.'},
+ {b:'I',q:'Según el artículo 12 de la Constitución, los españoles son mayores de edad a los:',o:['16 años','17 años','18 años','21 años'],a:2,e:'Art. 12 CE: los españoles son mayores de edad a los dieciocho años.'},
+ {b:'I',q:'El Defensor del Pueblo es alto comisionado de:',o:['El Gobierno','Las Cortes Generales','El Rey','El Consejo General del Poder Judicial'],a:1,e:'Art. 54 CE: alto comisionado de las Cortes Generales.'},
+ {b:'I',q:'¿Cuántos miembros componen el Tribunal Constitucional?',o:['9','10','12','15'],a:2,e:'Art. 159 CE: doce miembros nombrados por el Rey.'},
+ {b:'I',q:'¿Quién propone el candidato a la Presidencia del Gobierno al Congreso?',o:['El Presidente del Congreso','El Rey','El Consejo de Estado','La Junta de Portavoces'],a:1,e:'Art. 99 CE: el Rey, previa consulta con los representantes de los grupos políticos.'},
+ {b:'I',q:'Diputados y senadores son elegidos por un mandato de:',o:['3 años','4 años','5 años','6 años'],a:1,e:'Arts. 68.4 y 69.6 CE: cuatro años.'},
+ {b:'I',q:'El principio de igualdad ante la ley se recoge en el artículo:',o:['9','14','15','24'],a:1,e:'Art. 14 CE.'},
+ {b:'I',q:'Si la norma no fija plazo máximo para resolver un procedimiento, ese plazo es de:',o:['1 mes','3 meses','6 meses','10 días'],a:1,e:'Art. 21.3 de la Ley 39/2015: tres meses.'},
+ {b:'I',q:'Plazo para interponer recurso de alzada contra un acto expreso:',o:['10 días','1 mes','2 meses','3 meses'],a:1,e:'Art. 122.1 de la Ley 39/2015: un mes si el acto es expreso.'},
+ {b:'I',q:'Cuando los plazos se señalan por días, salvo que se diga otra cosa, se entiende que son:',o:['Naturales','Hábiles, excluidos sábados, domingos y festivos','Hábiles, excluidos solo domingos y festivos','Hábiles, excluido agosto'],a:1,e:'Art. 30.2 de la Ley 39/2015.'},
+ {b:'I',q:'En los procedimientos iniciados a solicitud del interesado, el silencio administrativo es, como regla general:',o:['Desestimatorio','Estimatorio','Indiferente','Caducidad'],a:1,e:'Art. 24.1 de la Ley 39/2015, salvo las excepciones que fija la ley.'},
+ {b:'I',q:'La notificación debe cursarse en el plazo de ____ desde que se dictó el acto:',o:['5 días','10 días','15 días','1 mes'],a:1,e:'Art. 40.2 de la Ley 39/2015: diez días.'},
+ {b:'I',q:'El texto refundido del Estatuto Básico del Empleado Público se aprobó por:',o:['Ley 7/2007','Real Decreto Legislativo 5/2015','Ley 30/1984','Real Decreto 364/1995'],a:1,e:'RDLeg 5/2015, de 30 de octubre.'},
+ {b:'I',q:'El Cuerpo General Auxiliar de la Administración del Estado pertenece al subgrupo:',o:['A2','C1','C2','E'],a:2,e:'Subgrupo C2: título de Graduado en ESO o equivalente.'},
+ {b:'I',q:'La Ley Orgánica 3/2007 regula:',o:['La protección de datos','La igualdad efectiva de mujeres y hombres','La violencia de género','La dependencia'],a:1,e:'LO 3/2007, de 22 de marzo, para la igualdad efectiva de mujeres y hombres.'},
+ {b:'P',q:'Continúa la serie: 2, 6, 12, 20, 30, …',o:['40','42','44','36'],a:1,e:'Las diferencias suben de dos en dos: +4, +6, +8, +10, +12 → 42.'},
+ {b:'P',q:'Continúa la serie: 3, 9, 27, 81, …',o:['162','243','324','108'],a:1,e:'Cada término se multiplica por 3.'},
+ {b:'P',q:'Si 3 personas tardan 6 horas en hacer un trabajo, ¿cuánto tardan 9 personas al mismo ritmo?',o:['18 horas','3 horas','2 horas','1,5 horas'],a:2,e:'Proporción inversa: el triple de personas tarda un tercio: 2 horas.'},
+ {b:'P',q:'¿Cuál es el 20 % de 150?',o:['20','25','30','35'],a:2,e:'150 × 0,20 = 30.'},
+ {b:'P',q:'¿Qué palabra no pertenece al grupo? Decreto, Orden, Ley, Expediente',o:['Decreto','Orden','Ley','Expediente'],a:3,e:'Las otras tres son normas jurídicas; el expediente es un conjunto de documentos.'},
+ {b:'P',q:'Un archivador cuesta 12 € y tiene un 25 % de descuento. ¿Cuánto se paga?',o:['8 €','9 €','9,50 €','10 €'],a:1,e:'12 × 0,75 = 9 €.'},
+ {b:'II',q:'En Excel, ¿cómo se escribe una referencia absoluta a la celda A1?',o:['A1','$A1','A$1','$A$1'],a:3,e:'El signo $ fija columna y fila. Se alterna con la tecla F4.'},
+ {b:'II',q:'En Excel en español, ¿qué devuelve =REDONDEAR(3,456;1)?',o:['3','3,4','3,5','3,46'],a:2,e:'Redondea a un decimal: 3,5.'},
+ {b:'II',q:'¿Qué función de Excel cuenta las celdas de un rango que cumplen un criterio?',o:['=CONTAR','=CONTARA','=CONTAR.SI','=SUMAR.SI'],a:2,e:'CONTAR.SI(rango;criterio).'},
+ {b:'II',q:'En Word en español, el atajo Ctrl + N aplica:',o:['Nuevo documento','Negrita','Cursiva','Subrayado'],a:1,e:'En la versión en español: Ctrl+N negrita, Ctrl+K cursiva, Ctrl+S subrayado.'},
+ {b:'II',q:'En Word, la vista que muestra el documento tal como se imprimirá es:',o:['Diseño web','Esquema','Borrador','Diseño de impresión'],a:3,e:'Diseño de impresión es la vista predeterminada.'},
+ {b:'II',q:'En Access, ¿qué objeto almacena los datos?',o:['Consultas','Formularios','Tablas','Informes'],a:2,e:'Las tablas guardan los datos; el resto los consulta o presenta.'},
+ {b:'II',q:'En Outlook, el campo CCO significa:',o:['Con copia obligatoria','Con copia oculta','Copia de correo original','Correo con confirmación'],a:1,e:'Los destinatarios en CCO no son visibles para el resto.'},
+ {b:'II',q:'En Windows, la combinación Windows + E abre:',o:['El Explorador de archivos','La configuración','El menú Inicio','El bloqueo de pantalla'],a:0,e:'Win+E abre el Explorador; Win+L bloquea la sesión.'},
+ {b:'II',q:'¿Qué protocolo indica que una web cifra la comunicación con el navegador?',o:['HTTP','FTP','HTTPS','SMTP'],a:2,e:'HTTPS usa cifrado TLS.'},
+ {b:'II',q:'En Windows, Ctrl + Z sirve para:',o:['Rehacer','Deshacer','Cortar','Cerrar la ventana'],a:1,e:'Ctrl+Z deshace la última acción; Ctrl+Y la rehace.'},
+ /* Bloque I · ampliación */
+ {b:'I',q:'¿Qué artículo de la Constitución reconoce el derecho a la autonomía de las nacionalidades y regiones?',o:['Art. 1','Art. 2','Art. 3','Art. 137'],a:1,e:'Art. 2 CE, junto a la indisoluble unidad de la Nación española.'},
+ {b:'I',q:'Según el artículo 5 de la Constitución, la capital del Estado es:',o:['Madrid','La villa de Madrid','La Comunidad de Madrid','La ciudad de Madrid'],a:1,e:'Art. 5 CE: «La capital del Estado es la villa de Madrid».'},
+ {b:'I',q:'¿Qué título de la Constitución regula la reforma constitucional?',o:['Título VIII','Título IX','Título X','Título Preliminar'],a:2,e:'Título X, arts. 166 a 169.'},
+ {b:'I',q:'El Congreso de los Diputados se compone de:',o:['Entre 250 y 350 diputados','Entre 300 y 400 diputados','350 diputados fijos por la Constitución','Entre 300 y 450 diputados'],a:1,e:'Art. 68.1 CE: mínimo 300 y máximo 400. La ley electoral fija 350.'},
+ {b:'I',q:'¿Cuántos senadores elige cada provincia peninsular?',o:['2','3','4','5'],a:2,e:'Art. 69.2 CE: cuatro senadores por provincia.'},
+ {b:'I',q:'Los miembros del Tribunal Constitucional se designan por un periodo de:',o:['5 años','6 años','9 años','12 años'],a:2,e:'Art. 159.3 CE: nueve años, renovándose por terceras partes cada tres.'},
+ {b:'I',q:'El Consejo General del Poder Judicial lo forman el Presidente del Tribunal Supremo y:',o:['12 miembros','15 miembros','20 miembros','21 miembros'],a:2,e:'Art. 122.3 CE: veinte miembros nombrados por cinco años.'},
+ {b:'I',q:'Para aprobar una moción de censura hace falta:',o:['Mayoría simple del Congreso','Mayoría absoluta del Congreso','Mayoría de tres quintos','Mayoría absoluta de las dos Cámaras'],a:1,e:'Art. 113 CE: mayoría absoluta y con un candidato a la Presidencia incluido.'},
+ {b:'I',q:'La confianza se entiende otorgada en una cuestión de confianza cuando vota a favor:',o:['La mayoría simple de los diputados','La mayoría absoluta','Dos tercios de la Cámara','Tres quintos'],a:0,e:'Art. 112 CE: mayoría simple.'},
+ {b:'I',q:'Los ministros son nombrados y separados por el Rey a propuesta de:',o:['El Congreso','El Presidente del Gobierno','El Consejo de Ministros','Las Cortes Generales'],a:1,e:'Art. 100 CE.'},
+ {b:'I',q:'¿Quién dirige la Administración del Estado en el territorio de una comunidad autónoma?',o:['El Subdelegado del Gobierno','El Presidente autonómico','El Delegado del Gobierno','El Gobernador civil'],a:2,e:'Art. 154 CE y Ley 40/2015.'},
+ {b:'I',q:'Si una solicitud no reúne los requisitos, se requiere al interesado para que la subsane en un plazo de:',o:['5 días','10 días','15 días','1 mes'],a:1,e:'Art. 68.1 de la Ley 39/2015: diez días, con aviso de desistimiento.'},
+ {b:'I',q:'Si el plazo se fija en meses, se computa:',o:['Desde el mismo día de la notificación','A partir del día siguiente, de fecha a fecha','Solo días hábiles','Por periodos de 30 días'],a:1,e:'Art. 30.4 de la Ley 39/2015.'},
+ {b:'I',q:'El recurso potestativo de reposición contra un acto expreso se interpone en el plazo de:',o:['10 días','15 días','1 mes','2 meses'],a:2,e:'Art. 124.1 de la Ley 39/2015.'},
+ {b:'I',q:'¿Qué artículo de la Ley 39/2015 enumera los actos nulos de pleno derecho?',o:['Art. 21','Art. 39','Art. 47','Art. 48'],a:2,e:'Art. 47. El art. 48 trata de la anulabilidad.'},
+ {b:'I',q:'La abstención y la recusación se regulan en:',o:['La Ley 39/2015','La Ley 40/2015','El TREBEP','La Ley 19/2013'],a:1,e:'Arts. 23 y 24 de la Ley 40/2015.'},
+ {b:'I',q:'Plazo máximo para resolver una solicitud de acceso a información pública:',o:['10 días','15 días','1 mes','3 meses'],a:2,e:'Art. 20.1 de la Ley 19/2013, ampliable otro mes.'},
+ {b:'I',q:'Según la LO 3/2018, un menor puede consentir el tratamiento de sus datos a partir de los:',o:['12 años','13 años','14 años','16 años'],a:2,e:'Art. 7 de la LO 3/2018: catorce años.'},
+ {b:'I',q:'¿Cuántos Objetivos de Desarrollo Sostenible recoge la Agenda 2030?',o:['10','15','17','21'],a:2,e:'17 objetivos y 169 metas.'},
+ {b:'I',q:'¿Qué institución de la UE tiene, por regla general, la iniciativa legislativa?',o:['El Parlamento Europeo','El Consejo Europeo','La Comisión Europea','El Tribunal de Justicia'],a:2,e:'La Comisión propone; Parlamento y Consejo aprueban.'},
+ {b:'I',q:'¿Cuál NO es una clase de empleado público según el artículo 8 del TREBEP?',o:['Funcionario interino','Personal eventual','Personal laboral','Personal colaborador'],a:3,e:'Son funcionarios de carrera, interinos, personal laboral y personal eventual.'},
+ {b:'I',q:'La excedencia para cuidar de cada hijo dura como máximo:',o:['1 año','2 años','3 años','5 años'],a:2,e:'Art. 89.4 del TREBEP.'},
+ {b:'I',q:'La Junta de Gobierno Local existe obligatoriamente en municipios de más de:',o:['1.000 habitantes','5.000 habitantes','20.000 habitantes','50.000 habitantes'],a:1,e:'Art. 20.1.b de la Ley 7/1985, o si lo decide el Pleno en los menores.'},
+ {b:'I',q:'La Ley Orgánica 1/2004 regula:',o:['La igualdad efectiva de mujeres y hombres','Las medidas de protección integral contra la violencia de género','La dependencia','La protección de datos'],a:1,e:'LO 1/2004, de 28 de diciembre.'},
+ /* Psicotécnicos · ampliación */
+ {b:'P',q:'Continúa la serie: 1, 1, 2, 3, 5, 8, …',o:['11','12','13','16'],a:2,e:'Cada número es la suma de los dos anteriores: 5 + 8 = 13.'},
+ {b:'P',q:'Continúa la serie: 100, 95, 85, 70, …',o:['55','50','45','60'],a:1,e:'Se resta 5, 10, 15 y luego 20.'},
+ {b:'P',q:'Sinónimo de «efímero»:',o:['Pasajero','Eterno','Frágil','Escaso'],a:0,e:'Efímero: que dura poco.'},
+ {b:'P',q:'Antónimo de «prolijo»:',o:['Extenso','Conciso','Ordenado','Lento'],a:1,e:'Prolijo es largo y detallado en exceso; lo contrario es conciso.'},
+ {b:'P',q:'¿Cuánto son los 3/4 de 80?',o:['50','60','64','70'],a:1,e:'80 ÷ 4 × 3 = 60.'},
+ {b:'P',q:'Un coche va a 90 km/h durante 2 horas y 20 minutos. ¿Cuántos km recorre?',o:['200 km','210 km','218 km','225 km'],a:1,e:'90 × 2 + 90 × 1/3 = 180 + 30 = 210 km.'},
+ {b:'P',q:'Hay que revisar un expediente de 240 páginas a 30 páginas por hora. ¿Cuántas horas hacen falta?',o:['6','7','8','9'],a:2,e:'240 ÷ 30 = 8.'},
+ {b:'P',q:'¿Cuál es la media de 6, 8, 10 y 12?',o:['8','9','10','9,5'],a:1,e:'36 ÷ 4 = 9.'},
+ /* Bloque II · ampliación */
+ {b:'II',q:'En Excel, la función =SI sirve para:',o:['Sumar si se cumple un criterio','Devolver un valor si la condición es verdadera y otro si es falsa','Buscar un valor en una tabla','Contar celdas no vacías'],a:1,e:'Ejemplo: =SI(A1>=5;"Apto";"No apto").'},
+ {b:'II',q:'La función =BUSCARV busca un valor en:',o:['La primera fila del rango','La primera columna del rango','La última columna del rango','Cualquier celda de la hoja'],a:1,e:'Busca en vertical en la primera columna y devuelve el dato de la columna indicada.'},
+ {b:'II',q:'¿Qué error muestra Excel al dividir entre cero?',o:['#¡VALOR!','#N/A','#¡DIV/0!','#¡REF!'],a:2,e:'#¡DIV/0! aparece cuando el divisor es 0 o una celda vacía.'},
+ {b:'II',q:'En Excel, Ctrl + Inicio lleva a:',o:['La última celda con datos','La celda A1','El principio de la fila','La hoja anterior'],a:1,e:'Ctrl+Fin lleva a la última celda usada.'},
+ {b:'II',q:'En Word, la combinación de correspondencia sirve para:',o:['Unir dos documentos en uno','Crear cartas o etiquetas personalizadas a partir de una lista de datos','Enviar el documento por correo','Comparar versiones'],a:1,e:'Se encuentra en la pestaña Correspondencia.'},
+ {b:'II',q:'En Word, ¿qué combinación inserta un salto de página?',o:['Mayús + Intro','Ctrl + Intro','Alt + Intro','Ctrl + Mayús + P'],a:1,e:'Mayús+Intro inserta un salto de línea manual.'},
+ {b:'II',q:'En Word en español, Ctrl + E sirve para:',o:['Centrar','Seleccionar todo','Enviar','Buscar'],a:1,e:'En español Ctrl+E selecciona todo y Ctrl+T centra.'},
+ {b:'II',q:'En Access, la clave principal:',o:['Protege la base de datos con contraseña','Identifica de forma única cada registro de una tabla','Ordena alfabéticamente la tabla','Relaciona dos bases de datos'],a:1,e:'No admite valores repetidos ni vacíos.'},
+ {b:'II',q:'En Access, ¿cuál NO es una consulta de acción?',o:['Consulta de eliminación','Consulta de actualización','Consulta de selección','Consulta de creación de tabla'],a:2,e:'La de selección solo muestra datos; las de acción los modifican.'},
+ {b:'II',q:'En Outlook, los mensajes que has mandado se guardan en:',o:['Bandeja de salida','Elementos enviados','Borradores','Archivo'],a:1,e:'La Bandeja de salida guarda los que aún no se han enviado.'},
+ {b:'II',q:'En Windows, Alt + Tab sirve para:',o:['Cerrar la ventana','Cambiar entre ventanas abiertas','Abrir el Administrador de tareas','Mostrar el escritorio'],a:1,e:'Win+D muestra el escritorio; Ctrl+Mayús+Esc abre el Administrador de tareas.'},
+ {b:'II',q:'¿Cuántos bytes tiene 1 KB en informática tradicional?',o:['1.000','1.024','512','2.048'],a:1,e:'2 elevado a 10 = 1.024 bytes.'},
+ {b:'II',q:'La memoria RAM es:',o:['Permanente y de solo lectura','Volátil: se borra al apagar el equipo','Un tipo de disco duro','Una memoria externa'],a:1,e:'La ROM es la de solo lectura.'},
+ {b:'II',q:'El phishing consiste en:',o:['Un virus que borra archivos','Suplantar a una entidad para robar datos o contraseñas','Bloquear la conexión a Internet','Copiar archivos a la nube'],a:1,e:'Suele llegar por correo o SMS con enlaces falsos.'},
+ {b:'II',q:'¿Dónde NO se pueden presentar documentos dirigidos a la Administración según el art. 16 de la Ley 39/2015?',o:['En el registro electrónico','En las oficinas de Correos','En las oficinas de asistencia en materia de registros','En cualquier oficina bancaria'],a:3,e:'También se admiten las representaciones diplomáticas y consulares en el extranjero.'},
+ {b:'II',q:'¿Cuál es el primer archivo por el que pasa un documento?',o:['Archivo histórico','Archivo intermedio','Archivo central','Archivo de oficina o de gestión'],a:3,e:'Ciclo vital: gestión, central, intermedio e histórico.'},
+ {b:'II',q:'Cl@ve es:',o:['Un programa antivirus','Un sistema de identificación y firma electrónica con la Administración','El registro electrónico general','Una sede electrónica'],a:1,e:'Permite identificarse con Cl@ve PIN o Cl@ve Permanente.'},
+ {b:'II',q:'En una URL, la parte «.es» es:',o:['El protocolo','El dominio de primer nivel','La ruta','El puerto'],a:1,e:'.es es el dominio de primer nivel de España.'}
+];
+const BNAME={I:'Bloque I',P:'Psicotécnico',II:'Bloque II'};
+const SECS_PER_Q=90*60/110;
+let cur=[],ans=[],checked=false,timerId=null,remain=0;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newTest(){
+  const b=$('#t-bloque').value,n=+$('#t-n').value;
+  cur=shuffle(Q.filter(q=>b==='all'||q.b===b)).slice(0,n);
+  ans=cur.map(()=>null);checked=false;$('#result').hidden=true;$('#t-check').disabled=false;
+  remain=Math.round(cur.length*SECS_PER_Q);clearInterval(timerId);tick();timerId=setInterval(()=>{remain--;tick();if(remain<=0){clearInterval(timerId);check()}},1000);
+  renderTest();
+}
+function tick(){const m=Math.floor(Math.max(remain,0)/60),s=Math.max(remain,0)%60;const t=$('#t-timer');t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');t.classList.toggle('low',remain<60)}
+function renderTest(){
+  $('#qs').innerHTML=cur.map((q,i)=>{
+    const st=checked?(ans[i]==null?'':ans[i]===q.a?' right':' wrong'):'';
+    return `<li class="q${st}" id="q${i}"><div class="q-top"><span class="num">${i+1}.</span><span>${esc(q.q)}</span><span class="chip">${BNAME[q.b]}</span></div>
+    <div class="opts" role="group" aria-label="Respuestas a la pregunta ${i+1}">${q.o.map((o,j)=>{
+      let c='opt';if(ans[i]===j)c+=' sel';if(checked){if(j===q.a)c+=' is-right';else if(ans[i]===j)c+=' is-wrong'}
+      return `<button class="${c}" data-i="${i}" data-j="${j}" ${checked?'disabled':''} aria-pressed="${ans[i]===j}"><span class="bub">${'ABCD'[j]}</span><span>${esc(o)}</span></button>`}).join('')}</div>
+    ${checked?`<p class="expl">${ans[i]==null?'En blanco. ':''}Correcta: ${'ABCD'[q.a]}. ${esc(q.e)}</p>`:''}</li>`}).join('');
+  $('#as-grid').innerHTML=cur.map((q,i)=>{let c='';if(checked){if(ans[i]!=null)c=ans[i]===q.a?'r':'w'}else if(ans[i]!=null)c='done';
+    return `<button class="${c}" data-go="${i}" aria-label="Ir a la pregunta ${i+1}">${i+1}${ans[i]!=null?'·'+'ABCD'[ans[i]]:''}</button>`}).join('');
+  $('#as-count').textContent=`${ans.filter(x=>x!=null).length} de ${cur.length} contestadas`;
+}
+$('#qs').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||checked)return;const i=+b.dataset.i,j=+b.dataset.j;ans[i]=ans[i]===j?null:j;renderTest();const nb=document.querySelector(`.opt[data-i="${i}"][data-j="${j}"]`);if(nb)nb.focus()});
+$('#as-grid').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;document.getElementById('q'+b.dataset.go).scrollIntoView({behavior:'smooth',block:'center'})});
+function check(){
+  if(checked)return;checked=true;clearInterval(timerId);$('#t-check').disabled=true;
+  let A=0,F=0,B=0;cur.forEach((q,i)=>{if(ans[i]==null)B++;else if(ans[i]===q.a)A++;else F++});
+  const net=A-F/3,nota=Math.max(0,net)/cur.length*10;
+  const r=$('#result');r.hidden=false;
+  r.innerHTML=`<span class="label">Resultado</span><div class="grade num ${nota>=5?'c-ok':'c-bad'}">${fmt(nota)}</div>
+   <div class="scores"><div><b class="c-ok">${A}</b><span>Bien</span></div><div><b class="c-bad">${F}</b><span>Mal</span></div><div><b>${B}</b><span>Blanco</span></div><div><b>${fmt(net,1)}</b><span>Netas</span></div></div>
+   <p class="note">Nota sobre 10 con −⅓ por fallo. ${F>0?`Los fallos te han quitado ${fmt(F/3/cur.length*10)} puntos.`:'Sin fallos. Muy bien.'}</p>`;
+  const h=store.get('hist',[]);h.unshift({d:Date.now(),n:nota,A,F,B,t:cur.length,b:$('#t-bloque').value});store.set('hist',h.slice(0,20));
+  renderTest();renderPanel();r.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+$('#t-new').addEventListener('click',newTest);
+$('#t-check').addEventListener('click',check);
+$('#t-bloque').addEventListener('change',newTest);$('#t-n').addEventListener('change',newTest);
+
+/* ---------- Panel ---------- */
+const dateIn=$('#exam-date');
+function defaultDate(){const d=new Date();d.setMonth(d.getMonth()+6);return d.toISOString().slice(0,10)}
+let examDate=store.get('date',null);
+dateIn.value=examDate||defaultDate();
+dateIn.addEventListener('change',()=>{examDate=dateIn.value||null;store.set('date',examDate);renderPanel()});
+function renderPanel(){
+  $('#date-hint').textContent=examDate?'':'Fecha de ejemplo: pon la de tu convocatoria.';
+  const target=new Date(dateIn.value+'T09:00:00'),ms=target-new Date();
+  const days=Math.max(0,Math.floor(ms/864e5)),hours=Math.max(0,Math.floor(ms%864e5/36e5));
+  const total=28,done=Object.values(estado).filter(s=>s>0).length,left=total-done;
+  $('#cd-d').textContent=isNaN(days)?'--':days;$('#cd-h').textContent=isNaN(hours)?'--':hours;
+  const weeks=Math.max(days/7,1);$('#cd-t').textContent=left===0?'✓':fmt(left/weeks,1);
+  const pct=Math.round(done/total*100);$('#st-pct').textContent=pct+'%';$('#st-bar').style.width=pct+'%';
+  const rep=Object.values(estado).filter(s=>s===2).length;
+  $('#st-detail').textContent=`${done} de ${total} temas · ${rep} repasados`;
+  let next=null;for(const b of ['I','II']){const i=TEMARIO[b].temas.findIndex((_,i)=>!(estado[key(b,i)]>0));if(i>=0){next={b,i};break}}
+  if(next){$('#next-tema').textContent=`T${next.i+1}. ${TEMARIO[next.b].temas[next.i]}`;$('#next-bloque').textContent=TEMARIO[next.b].name}
+  else{$('#next-tema').textContent='Temario completo. Toca repasar.';$('#next-bloque').textContent=''}
+  const h=store.get('hist',[]);
+  if(h.length){const avg=h.slice(0,10).reduce((s,x)=>s+x.n,0)/Math.min(h.length,10);$('#st-avg').textContent=fmt(avg);$('#st-avg-detail').textContent=`Media de tus últimos ${Math.min(h.length,10)} test, sobre 10 y con penalización.`}
+  $('#hist').innerHTML=h.length?h.slice(0,5).map(x=>`<li><span>${new Date(x.d).toLocaleDateString('es-ES',{day:'numeric',month:'short'})} · ${x.b==='all'?'Mezclado':BNAME[x.b]} · ${x.t} preguntas</span><span class="num ${x.n>=5?'c-ok':'c-bad'}">${fmt(x.n)}</span></li>`).join(''):'<li><span class="note">Aún no has hecho ningún test. Tus resultados aparecerán aquí.</span></li>';
+}
+
+/* ---------- Calculadora ---------- */
+function calc(p,max){
+  const A=+$(`#${p}-a`).value||0,F=+$(`#${p}-f`).value||0,N=+$(`#${p}-n`).value||1;
+  const out=$(`#${p}-out`);
+  if(A+F>N){out.innerHTML=`<p class="c-bad">Aciertos y fallos suman ${A+F}, más que las ${N} preguntas. Revisa los números.</p>`;return}
+  const net=A-F/3,n50=Math.max(0,net)/N*50;
+  out.innerHTML=`<div class="result"><div class="scores" style="grid-template-columns:repeat(3,1fr)"><div><b>${A+F<N?N-A-F:0}</b><span>En blanco</span></div><div><b>${fmt(net,2)}</b><span>Netas</span></div><div><b class="c-ok">${fmt(n50,2)}</b><span>Sobre 50</span></div></div><div class="bar ok"><span style="width:${Math.min(100,n50*2)}%"></span></div></div>`;
+}
+['p1','p2'].forEach(p=>['a','f','n'].forEach(k=>$(`#${p}-${k}`).addEventListener('input',()=>calc(p))));
+
+/* ---------- Pomodoro ---------- */
+const PH={study:25*60,short:5*60,long:15*60};
+let phase='study',left=PH.study,run=null,cycles=0;
+const today=new Date().toISOString().slice(0,10);
+let pd=store.get('pomo',{d:today,n:0});if(pd.d!==today)pd={d:today,n:0};
+function pmRender(){const m=Math.floor(left/60),s=left%60;$('#pm-clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const ph=$('#pm-phase');ph.textContent=phase==='study'?'Estudio':phase==='short'?'Descanso corto':'Descanso largo';ph.classList.toggle('rest',phase!=='study');
+  $('#pm-go').textContent=run?'Pausar':'Empezar';$('#pm-count').textContent=`Hoy: ${pd.n} pomodoro${pd.n===1?'':'s'}`}
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.25,.5].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.setValueAtTime(.15,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.2);o.connect(g).connect(c.destination);o.start(c.currentTime+t);o.stop(c.currentTime+t+.2)})}catch(e){}}
+function nextPhase(sound){if(phase==='study'){pd.n++;cycles++;store.set('pomo',pd);phase=cycles%4===0?'long':'short'}else phase='study';left=PH[phase];if(sound)beep();pmRender()}
+$('#pm-go').addEventListener('click',()=>{if(run){clearInterval(run);run=null}else{run=setInterval(()=>{left--;if(left<=0)nextPhase(true);pmRender()},1000)}pmRender()});
+$('#pm-reset').addEventListener('click',()=>{clearInterval(run);run=null;phase='study';left=PH.study;pmRender()});
+$('#pm-skip').addEventListener('click',()=>nextPhase(false));
+
+/* ---------- Navegación ---------- */
+const VIEWS=['panel','temario','test','nota','estudio'];
+function route(){const v=VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):'panel';
+  VIEWS.forEach(x=>{$('#v-'+x).hidden=x!==v});
+  document.querySelectorAll('nav.tabs a').forEach(a=>{if(a.dataset.v===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);
+
+renderTemario();renderPanel();newTest();calc('p1');calc('p2');pmRender();route();
+setInterval(renderPanel,60000);
+})();
+</script>
+</body>
+</html>
