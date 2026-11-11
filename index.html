@@ -151,6 +151,7 @@ input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:v
 .opt.sel.is-wrong{background:var(--bad-soft)}
 .opt.sel.is-wrong .bub{background:var(--bad);border-color:var(--bad);color:#FFFFFF}
 .expl{font-size:.9rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 14px}
+.expl{display:grid;gap:6px}.expl b{color:var(--ink)}.expl .ref{color:var(--teal);font-weight:600}
 .answer-sheet{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);display:grid;gap:12px}
 .as-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .as-grid button{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:4px 0;font-size:.74rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
@@ -275,7 +276,7 @@ footer svg{width:28px;height:28px;flex:none}
   <div class="view-head">
     <span class="label">Hoja de respuestas</span>
     <h2>Test con <em>penalización real</em></h2>
-    <p>Marca una burbuja por pregunta, o déjala en blanco si dudas. Al corregir, cada fallo resta ⅓. El reloj va al ritmo del examen: unos 49 segundos por pregunta.</p>
+    <p>Elige materia y tema, marca una burbuja por pregunta o déjala en blanco si dudas. Al corregir verás la respuesta buena y el artículo de la ley. Cada fallo resta ⅓ y el reloj va al ritmo del examen. Las preguntas que falles quedan guardadas para repasarlas.</p>
   </div>
   <div class="card test-bar" id="test-setup">
     <div class="row">
@@ -285,14 +286,27 @@ footer svg{width:28px;height:28px;flex:none}
         <option value="I">Bloque I · Organización pública</option>
         <option value="P">Psicotécnicos</option>
         <option value="II">Bloque II · Ofimática</option>
+        <option value="X">Otras materias</option>
       </select>
-      <label for="t-n" class="label">Preguntas</label>
+      <label for="t-tema" class="label">Tema</label>
+      <select id="t-tema" style="max-width:min(100%,320px)"><option value="all">Todos los temas</option></select>
+    </div>
+    <div class="row">
+      <label for="t-modo" class="label">Qué preguntas</label>
+      <select id="t-modo">
+        <option value="all">Todas</option>
+        <option value="new">Las que no he hecho</option>
+        <option value="bad">Las que he fallado</option>
+      </select>
+      <label for="t-n" class="label">Cuántas</label>
       <select id="t-n">
         <option value="10">10</option>
         <option value="20" selected>20</option>
-        <option value="999">Todas</option>
+        <option value="50">50</option>
+        <option value="110">110 (simulacro)</option>
       </select>
     </div>
+    <p class="note" id="t-pool" style="flex-basis:100%"></p>
     <div class="row">
       <span class="timer" id="t-timer">00:00</span>
       <button class="btn" id="t-new">Nuevo test</button>
@@ -378,6 +392,7 @@ footer svg{width:28px;height:28px;flex:none}
 </main>
 <footer><div class="wrap"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#F4A582"/><path d="M20 7 33.5 14.5H6.5Z" fill="#4A2C1E"/><rect x="9.5" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="17.75" y="17" width="4.5" height="11" rx="1" fill="#FFFFFF"/><rect x="26" y="17" width="4.5" height="11" rx="1" fill="#4A2C1E"/><rect x="6.5" y="29.5" width="27" height="3.5" rx="1" fill="#4A2C1E"/></svg><span>Plaza C2 · herramienta de estudio para opositores. No es una web oficial: consulta las convocatorias en el BOE y en la web del INAP.</span></div></footer>
 
+<script src="banco.js"></script>
 <script>
 (function(){
 const store={get(k,d){try{const v=localStorage.getItem('pc2-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pc2-'+k,JSON.stringify(v))}catch(e){}}};
@@ -528,16 +543,33 @@ const Q=[
  {b:'II',q:'Cl@ve es:',o:['Un programa antivirus','Un sistema de identificación y firma electrónica con la Administración','El registro electrónico general','Una sede electrónica'],a:1,e:'Permite identificarse con Cl@ve PIN o Cl@ve Permanente.'},
  {b:'II',q:'En una URL, la parte «.es» es:',o:['El protocolo','El dominio de primer nivel','La ruta','El puerto'],a:1,e:'.es es el dominio de primer nivel de España.'}
 ];
-const BNAME={I:'Bloque I',P:'Psicotécnico',II:'Bloque II'};
+/* Banco de preguntas sacado de tus capturas (banco.js) */
+(window.BANCO||[]).forEach(x=>Q.push({b:x.b,q:x.q,o:x.o,a:x.a,r:x.r||'',e:x.e||'',t:x.t||''}));
+const qid=q=>{let h=0;const s=q.q+'|'+q.o.join('|');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return 'q'+(h>>>0).toString(36)};
+Q.forEach(q=>q.id=qid(q));
+let qstats=store.get('qstats',{});
+const BNAME={I:'Bloque I',P:'Psicotécnico',II:'Bloque II',X:'Otras materias'};
 const SECS_PER_Q=90*60/110;
 let cur=[],ans=[],checked=false,timerId=null,remain=0;
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pool(){
+  const b=$('#t-bloque').value,t=$('#t-tema').value,m=$('#t-modo').value;
+  return Q.filter(q=>(b==='all'||q.b===b)&&(t==='all'||q.t===t)&&(m==='all'||(m==='new'&&!qstats[q.id])||(m==='bad'&&qstats[q.id]&&qstats[q.id].f>0)));
+}
+function fillTemas(){
+  const b=$('#t-bloque').value,sel=$('#t-tema'),prev=sel.value;
+  const temas=[...new Set(Q.filter(q=>(b==='all'||q.b===b)&&q.t).map(q=>q.t))].sort((x,y)=>x.localeCompare(y,'es',{numeric:true}));
+  sel.innerHTML='<option value="all">Todos los temas</option>'+temas.map(t=>`<option value="${esc(t)}">${esc(t.length>70?t.slice(0,68)+'…':t)}</option>`).join('');
+  sel.value=temas.includes(prev)?prev:'all';
+}
+function poolInfo(){const p=pool().length;$('#t-pool').textContent=`${p} pregunta${p===1?'':'s'} disponibles con estos filtros · ${Q.length} en total`}
 function newTest(){
-  const b=$('#t-bloque').value,n=+$('#t-n').value;
-  cur=shuffle(Q.filter(q=>b==='all'||q.b===b)).slice(0,n);
+  const n=+$('#t-n').value;poolInfo();
+  cur=shuffle(pool()).slice(0,n);
   ans=cur.map(()=>null);checked=false;$('#result').hidden=true;$('#t-check').disabled=false;
   remain=Math.round(cur.length*SECS_PER_Q);clearInterval(timerId);tick();timerId=setInterval(()=>{remain--;tick();if(remain<=0){clearInterval(timerId);check()}},1000);
   renderTest();
+  if(!cur.length)$('#qs').innerHTML='<li class="q"><p>No hay preguntas con estos filtros. Prueba con otra materia, otro tema o «Todas».</p></li>';
 }
 function tick(){const m=Math.floor(Math.max(remain,0)/60),s=Math.max(remain,0)%60;const t=$('#t-timer');t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');t.classList.toggle('low',remain<60)}
 function renderTest(){
@@ -547,7 +579,7 @@ function renderTest(){
     <div class="opts" role="group" aria-label="Respuestas a la pregunta ${i+1}">${q.o.map((o,j)=>{
       let c='opt';if(ans[i]===j)c+=' sel';if(checked){if(j===q.a)c+=' is-right';else if(ans[i]===j)c+=' is-wrong'}
       return `<button class="${c}" data-i="${i}" data-j="${j}" ${checked?'disabled':''} aria-pressed="${ans[i]===j}"><span class="bub">${'ABCD'[j]}</span><span>${esc(o)}</span></button>`}).join('')}</div>
-    ${checked?`<p class="expl">${ans[i]==null?'En blanco. ':''}Correcta: ${'ABCD'[q.a]}. ${esc(q.e)}</p>`:''}</li>`}).join('');
+    ${checked?`<div class="expl"><p><b>${ans[i]==null?'En blanco. ':''}Correcta: ${'ABCD'[q.a]}.</b>${q.r?` <span class="ref">${esc(q.r)}</span>`:''}</p>${q.e?`<p>${esc(q.e)}</p>`:(q.r?'':`<p>${q.t?esc(q.t)+'. ':''}La captura no traía explicación.</p>`)}</div>`:''}</li>`}).join('');
   $('#as-grid').innerHTML=cur.map((q,i)=>{let c='';if(checked){if(ans[i]!=null)c=ans[i]===q.a?'r':'w'}else if(ans[i]!=null)c='done';
     return `<button class="${c}" data-go="${i}" aria-label="Ir a la pregunta ${i+1}">${i+1}${ans[i]!=null?'·'+'ABCD'[ans[i]]:''}</button>`}).join('');
   $('#as-count').textContent=`${ans.filter(x=>x!=null).length} de ${cur.length} contestadas`;
@@ -556,7 +588,9 @@ $('#qs').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||ch
 $('#as-grid').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;document.getElementById('q'+b.dataset.go).scrollIntoView({behavior:'smooth',block:'center'})});
 function check(){
   if(checked)return;checked=true;clearInterval(timerId);$('#t-check').disabled=true;
-  let A=0,F=0,B=0;cur.forEach((q,i)=>{if(ans[i]==null)B++;else if(ans[i]===q.a)A++;else F++});
+  let A=0,F=0,B=0;cur.forEach((q,i)=>{if(ans[i]==null)B++;else if(ans[i]===q.a)A++;else F++;
+    const s=qstats[q.id]||{v:0,f:0};s.v++;if(ans[i]!=null&&ans[i]!==q.a)s.f++;else if(ans[i]===q.a&&s.f>0)s.f--;qstats[q.id]=s});
+  store.set('qstats',qstats);
   const net=A-F/3,nota=Math.max(0,net)/cur.length*10;
   const r=$('#result');r.hidden=false;
   r.innerHTML=`<span class="label">Resultado</span><div class="grade num ${nota>=5?'c-ok':'c-bad'}">${fmt(nota)}</div>
@@ -567,7 +601,9 @@ function check(){
 }
 $('#t-new').addEventListener('click',newTest);
 $('#t-check').addEventListener('click',check);
-$('#t-bloque').addEventListener('change',newTest);$('#t-n').addEventListener('change',newTest);
+$('#t-bloque').addEventListener('change',()=>{fillTemas();newTest()});
+['#t-tema','#t-modo','#t-n'].forEach(s=>$(s).addEventListener('change',newTest));
+fillTemas();
 
 /* ---------- Panel ---------- */
 const dateIn=$('#exam-date');
