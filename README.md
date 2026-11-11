@@ -1,3 +1,5 @@
+<img src="logo.svg" width="56" alt="Logo de Plaza C2">
+
 # Plaza C2
 
 Web de estudio para opositores a **Auxiliar Administrativo del Estado** (Cuerpo General Auxiliar, subgrupo C2).
