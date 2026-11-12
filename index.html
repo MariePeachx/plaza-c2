@@ -103,6 +103,12 @@ input[type=date],input[type=number],select{font:inherit;font-size:.92rem;color:v
 .exam dt{font-family:var(--f-display);font-weight:800;color:var(--teal);min-width:3.2em;font-variant-numeric:tabular-nums}
 .exam dd{margin:0;font-size:.94rem}
 .stat{display:grid;gap:8px}
+.bank-wrap{overflow-x:auto}
+.bank{width:100%;border-collapse:collapse;font-size:.92rem;min-width:460px}
+.bank th,.bank td{text-align:left;padding:10px 8px;border-top:1px solid var(--line);vertical-align:middle}
+.bank thead th{border-top:0;font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.bank tbody th{font-weight:600}
+.bank td .bar{margin-bottom:4px;max-width:180px}
 .stat .big{font-family:var(--f-display);font-size:2.2rem;font-weight:800;line-height:1}
 .hist{display:grid;margin:0;padding:0;list-style:none}
 .hist li{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;border-top:1px solid var(--line);padding-block:10px}
@@ -251,6 +257,14 @@ footer svg{width:28px;height:28px;flex:none}
     </div>
   </div>
 
+  <div class="card" style="display:grid;gap:12px">
+    <div class="row" style="justify-content:space-between">
+      <span class="label">Tu banco de preguntas</span>
+      <button class="btn primary" id="go-bad" type="button">Repasar falladas</button>
+    </div>
+    <div class="bank-wrap"><table class="bank" id="bank-stats"></table></div>
+  </div>
+
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px">
       <span class="label">Últimos test</span>
@@ -292,6 +306,11 @@ footer svg{width:28px;height:28px;flex:none}
       <select id="t-tema" style="max-width:min(100%,320px)"><option value="all">Todos los temas</option></select>
     </div>
     <div class="row">
+      <label for="t-tipo" class="label">Modo</label>
+      <select id="t-tipo">
+        <option value="exam">Examen: corrijo al final</option>
+        <option value="prac">Práctica: veo la respuesta al momento</option>
+      </select>
       <label for="t-modo" class="label">Qué preguntas</label>
       <select id="t-modo">
         <option value="all">Todas</option>
@@ -550,7 +569,9 @@ Q.forEach(q=>q.id=qid(q));
 let qstats=store.get('qstats',{});
 const BNAME={I:'Bloque I',P:'Psicotécnico',II:'Bloque II',X:'Otras materias'};
 const SECS_PER_Q=90*60/110;
-let cur=[],ans=[],checked=false,timerId=null,remain=0;
+let cur=[],ans=[],rev=[],checked=false,timerId=null,remain=0;
+const prac=()=>$('#t-tipo').value==='prac';
+function rec(q,a){const s=qstats[q.id]||{v:0,f:0,c:0};s.v++;s.c=s.c||0;if(a!=null&&a!==q.a)s.f++;else if(a===q.a){s.c++;if(s.f>0)s.f--}qstats[q.id]=s}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function pool(){
   const b=$('#t-bloque').value,t=$('#t-tema').value,m=$('#t-modo').value;
@@ -566,30 +587,36 @@ function poolInfo(){const p=pool().length;$('#t-pool').textContent=`${p} pregunt
 function newTest(){
   const n=+$('#t-n').value;poolInfo();
   cur=shuffle(pool()).slice(0,n);
-  ans=cur.map(()=>null);checked=false;$('#result').hidden=true;$('#t-check').disabled=false;
-  remain=Math.round(cur.length*SECS_PER_Q);clearInterval(timerId);tick();timerId=setInterval(()=>{remain--;tick();if(remain<=0){clearInterval(timerId);check()}},1000);
+  ans=cur.map(()=>null);rev=cur.map(()=>false);checked=false;$('#result').hidden=true;$('#t-check').disabled=false;
+  $('#t-check').textContent=prac()?'Terminar y ver nota':'Corregir';
+  clearInterval(timerId);
+  if(prac()){$('#t-timer').textContent='Sin reloj';$('#t-timer').classList.remove('low')}
+  else{remain=Math.round(cur.length*SECS_PER_Q);tick();timerId=setInterval(()=>{remain--;tick();if(remain<=0){clearInterval(timerId);check()}},1000)}
   renderTest();
   if(!cur.length)$('#qs').innerHTML='<li class="q"><p>No hay preguntas con estos filtros. Prueba con otra materia, otro tema o «Todas».</p></li>';
 }
 function tick(){const m=Math.floor(Math.max(remain,0)/60),s=Math.max(remain,0)%60;const t=$('#t-timer');t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');t.classList.toggle('low',remain<60)}
 function renderTest(){
   $('#qs').innerHTML=cur.map((q,i)=>{
-    const st=checked?(ans[i]==null?'':ans[i]===q.a?' right':' wrong'):'';
+    const done=checked||rev[i];
+    const st=done?(ans[i]==null?'':ans[i]===q.a?' right':' wrong'):'';
     return `<li class="q${st}" id="q${i}"><div class="q-top"><span class="num">${i+1}.</span><span>${esc(q.q)}</span><span class="chip">${BNAME[q.b]}</span></div>
     <div class="opts" role="group" aria-label="Respuestas a la pregunta ${i+1}">${q.o.map((o,j)=>{
-      let c='opt';if(ans[i]===j)c+=' sel';if(checked){if(j===q.a)c+=' is-right';else if(ans[i]===j)c+=' is-wrong'}
-      return `<button class="${c}" data-i="${i}" data-j="${j}" ${checked?'disabled':''} aria-pressed="${ans[i]===j}"><span class="bub">${'ABCD'[j]}</span><span>${esc(o)}</span></button>`}).join('')}</div>
-    ${checked?`<div class="expl"><p><b>${ans[i]==null?'En blanco. ':''}Correcta: ${'ABCD'[q.a]}.</b>${q.r?` <span class="ref">${esc(q.r)}</span>`:''}</p>${q.e?`<p>${esc(q.e)}</p>`:(q.r?'':`<p>${q.t?esc(q.t)+'. ':''}La captura no traía explicación.</p>`)}</div>`:''}</li>`}).join('');
-  $('#as-grid').innerHTML=cur.map((q,i)=>{let c='';if(checked){if(ans[i]!=null)c=ans[i]===q.a?'r':'w'}else if(ans[i]!=null)c='done';
+      let c='opt';if(ans[i]===j)c+=' sel';if(done){if(j===q.a)c+=' is-right';else if(ans[i]===j)c+=' is-wrong'}
+      return `<button class="${c}" data-i="${i}" data-j="${j}" ${done?'disabled':''} aria-pressed="${ans[i]===j}"><span class="bub">${'ABCD'[j]}</span><span>${esc(o)}</span></button>`}).join('')}</div>
+    ${done?`<div class="expl"><p><b>${ans[i]==null?'En blanco. ':''}Correcta: ${'ABCD'[q.a]}.</b>${q.r?` <span class="ref">${esc(q.r)}</span>`:''}</p>${q.e?`<p>${esc(q.e)}</p>`:(q.r?'':`<p>${q.t?esc(q.t)+'. ':''}La captura no traía explicación.</p>`)}</div>`:''}</li>`}).join('');
+  $('#as-grid').innerHTML=cur.map((q,i)=>{let c='';if(checked||rev[i]){if(ans[i]!=null)c=ans[i]===q.a?'r':'w'}else if(ans[i]!=null)c='done';
     return `<button class="${c}" data-go="${i}" aria-label="Ir a la pregunta ${i+1}">${i+1}${ans[i]!=null?'·'+'ABCD'[ans[i]]:''}</button>`}).join('');
   $('#as-count').textContent=`${ans.filter(x=>x!=null).length} de ${cur.length} contestadas`;
 }
-$('#qs').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||checked)return;const i=+b.dataset.i,j=+b.dataset.j;ans[i]=ans[i]===j?null:j;renderTest();const nb=document.querySelector(`.opt[data-i="${i}"][data-j="${j}"]`);if(nb)nb.focus()});
+$('#qs').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||checked)return;const i=+b.dataset.i,j=+b.dataset.j;
+  if(prac()){if(rev[i])return;ans[i]=j;rev[i]=true;rec(cur[i],j);store.set('qstats',qstats);renderPanel()}else ans[i]=ans[i]===j?null:j;
+  renderTest();const nb=document.querySelector(`.opt[data-i="${i}"][data-j="${j}"]`);if(nb)nb.focus()});
 $('#as-grid').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;document.getElementById('q'+b.dataset.go).scrollIntoView({behavior:'smooth',block:'center'})});
 function check(){
   if(checked)return;checked=true;clearInterval(timerId);$('#t-check').disabled=true;
   let A=0,F=0,B=0;cur.forEach((q,i)=>{if(ans[i]==null)B++;else if(ans[i]===q.a)A++;else F++;
-    const s=qstats[q.id]||{v:0,f:0};s.v++;if(ans[i]!=null&&ans[i]!==q.a)s.f++;else if(ans[i]===q.a&&s.f>0)s.f--;qstats[q.id]=s});
+    if(!rev[i]&&(ans[i]!=null||!prac()))rec(q,ans[i])});
   store.set('qstats',qstats);
   const net=A-F/3,nota=Math.max(0,net)/cur.length*10;
   const r=$('#result');r.hidden=false;
@@ -602,7 +629,17 @@ function check(){
 $('#t-new').addEventListener('click',newTest);
 $('#t-check').addEventListener('click',check);
 $('#t-bloque').addEventListener('change',()=>{fillTemas();newTest()});
-['#t-tema','#t-modo','#t-n'].forEach(s=>$(s).addEventListener('change',newTest));
+['#t-tema','#t-modo','#t-n','#t-tipo'].forEach(s=>$(s).addEventListener('change',newTest));
+$('#go-bad').addEventListener('click',()=>{$('#t-bloque').value='all';fillTemas();$('#t-tema').value='all';$('#t-modo').value='bad';$('#t-tipo').value='prac';location.hash='#test';newTest()});
+function renderBank(){
+  const rows=['I','II','P','X'].map(b=>{const qs=Q.filter(q=>q.b===b);if(!qs.length)return '';
+    let h=0,v=0,c=0,f=0;qs.forEach(q=>{const s=qstats[q.id];if(s){h++;v+=s.v;c+=s.c||0;if(s.f>0)f++}});
+    const pct=h?Math.round(h/qs.length*100):0;
+    return `<tr><th scope="row">${BNAME[b]}</th><td class="num">${qs.length}</td><td><div class="bar"><span style="width:${pct}%"></span></div><span class="note num">${h} hechas</span></td><td class="num">${v?Math.round(c/v*100)+'%':'—'}</td><td class="num ${f?'c-bad':''}">${f}</td></tr>`}).join('');
+  $('#bank-stats').innerHTML=`<thead><tr><th>Materia</th><th>Preguntas</th><th>Hechas</th><th>Aciertos</th><th>Falladas</th></tr></thead><tbody>${rows}</tbody>`;
+  const bad=Q.filter(q=>qstats[q.id]&&qstats[q.id].f>0).length;
+  $('#go-bad').textContent=bad?`Repasar falladas (${bad})`:'Repasar falladas';$('#go-bad').disabled=!bad;
+}
 fillTemas();
 
 /* ---------- Panel ---------- */
@@ -612,6 +649,7 @@ let examDate=store.get('date',null);
 dateIn.value=examDate||defaultDate();
 dateIn.addEventListener('change',()=>{examDate=dateIn.value||null;store.set('date',examDate);renderPanel()});
 function renderPanel(){
+  renderBank();
   $('#date-hint').textContent=examDate?'':'Fecha de ejemplo: pon la de tu convocatoria.';
   const target=new Date(dateIn.value+'T09:00:00'),ms=target-new Date();
   const days=Math.max(0,Math.floor(ms/864e5)),hours=Math.max(0,Math.floor(ms%864e5/36e5));
